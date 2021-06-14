@@ -1,85 +1,136 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/jackc/pgx/v4"
 	"log"
-	"math/rand"
 	"net/http"
-	"strconv"
 )
+
 type Flat struct {
-	Id string `json:"id"`
-	City *City `json:"city"`
-	Street string	`json:"street"`
-	HouseNumber string	`json:"house_number"`
-	RoomNumber int	`json:"room_number"`
-	Description string	`json:"description"`
+	Id          int    `json:"id"`
+	Street      string `json:"street"`
+	HouseNumber string `json:"house_number"`
+	RoomNumber  int    `json:"room_number"`
+	Description string `json:"description"`
+	City        City   `json:"city"`
 }
 
 type City struct {
-	Country string	`json:"country"`
-	Name string	`json:"name"`
+	Id      int    `json:"id"`
+	Country string `json:"country"`
+	Name    string `json:"name"`
 }
 
-var DB = make(map[string]Flat)
+var conn *pgx.Conn
 
 func main() {
+	var err error
+
+	url := fmt.Sprintf(
+		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
+		"postgres",
+		"123456",
+		"localhost",
+		"5432",
+		"postgres")
+
+	conn, err = pgx.Connect(context.Background(), url)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	r := mux.NewRouter()
-
-	DB["1"] = Flat{"1",&City{"Belarus","Minsk"},"Lenina","12A", 23, "Хорошая квартира"}
-	DB["2"] = Flat{"2",&City{"Russia","Moscow"},"Tolstogo","23", 123, "Квартира возле кремля"}
-
 
 	r.HandleFunc("/flats", createFlat).Methods("POST")
 	r.HandleFunc("/flats", getFlats).Methods("GET")
 	r.HandleFunc("/flats/{id}", getFlat).Methods("GET")
-	r.HandleFunc("/flats/{id}", updateFlat).Methods("PUT")
+	//r.HandleFunc("/flats/{id}", updateFlat).Methods("PUT")
 	r.HandleFunc("/flats/{id}", deleteFlat).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 
 }
 
-func createFlat(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	var flat Flat
-	_ = json.NewDecoder(r.Body).Decode(&flat)
-	flat.Id = strconv.Itoa(rand.Intn(100))
-	DB[flat.Id] = flat
-	_ = json.NewEncoder(w).Encode(flat)
-}
-
-
-
 func getFlats(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	err := json.NewEncoder(w).Encode(DB); if err != nil {
-		log.Fatal(err)
+	rows, _ := conn.Query(context.Background(), "SELECT * FROM flats")
+	defer rows.Close()
+
+	var f Flat
+	for rows.Next() {
+		err := rows.Scan(
+			&f.Id,
+			&f.Street,
+			&f.HouseNumber,
+			&f.RoomNumber,
+			&f.Description,
+			&f.City.Id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//fmt.Printf("%d, %s,%s,%d,%s,%d\n", f.Id, f.Street,f.HouseNumber,f.RoomNumber,f.Description,f.City.Id)
+
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(f)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func getFlat(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type","application/json")
 	params := mux.Vars(r)
-	for _,item := range DB {
-		if item.Id == params["id"] {
-			err := json.NewEncoder(w).Encode(item); if err != nil {
-				log.Fatal(err)
-			}
+
+	rows, _ := conn.Query(context.Background(), "SELECT * FROM flats WHERE id=$1", params["id"])
+	defer rows.Close()
+
+	var f Flat
+	for rows.Next() {
+		err := rows.Scan(
+			&f.Id,
+			&f.Street,
+			&f.HouseNumber,
+			&f.RoomNumber,
+			&f.Description,
+			&f.City.Id)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//fmt.Printf("%d, %s,%s,%d,%s,%d\n", f.Id, f.Street,f.HouseNumber,f.RoomNumber,f.Description,f.City.Id)
+
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(&f)
+		if err != nil {
+			log.Fatal(err)
 		}
 	}
 }
 
-func updateFlat(w http.ResponseWriter, r *http.Request) {
+func createFlat(w http.ResponseWriter, r *http.Request) {
+	var f Flat
 
+	query := "INSERT INTO flats (id,street,house_number,room_number,description,city_id) VALUES ($1,$2,$3,$4,$5,$6)"
+
+	insert, err := conn.Query(context.Background(), query, f.Id, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer insert.Close()
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewDecoder(r.Body).Decode(f)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func deleteFlat(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	for _, item := range DB {
-		if item.Id == params["id"] {
-			delete(DB,item.Id)
-		}
+	_, err := conn.Exec(context.Background(), "DELETE FROM flats WHERE id=$1", params["id"])
+	if err != nil {
+		log.Fatal(err)
 	}
 }

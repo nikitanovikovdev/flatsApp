@@ -48,10 +48,29 @@ func main() {
 	r.HandleFunc("/flats", createFlat).Methods("POST")
 	r.HandleFunc("/flats", getFlats).Methods("GET")
 	r.HandleFunc("/flats/{id}", getFlat).Methods("GET")
-	//r.HandleFunc("/flats/{id}", updateFlat).Methods("PUT")
+	r.HandleFunc("/flats/{id}", updateFlat).Methods("PUT")
 	r.HandleFunc("/flats/{id}", deleteFlat).Methods("DELETE")
 
 	log.Fatal(http.ListenAndServe(":8080", r))
+
+}
+
+func createFlat(w http.ResponseWriter, r *http.Request) {
+	var f Flat
+
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewDecoder(r.Body).Decode(&f)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	query := "INSERT INTO flats (street,house_number,room_number,description,city_id) VALUES ($1,$2,$3,$4,$5)"
+
+	insert, err := conn.Query(context.Background(), query, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.Id)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer insert.Close()
 
 }
 
@@ -88,6 +107,7 @@ func getFlat(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	var f Flat
+
 	for rows.Next() {
 		err := rows.Scan(
 			&f.Id,
@@ -100,28 +120,23 @@ func getFlat(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 		//fmt.Printf("%d, %s,%s,%d,%s,%d\n", f.Id, f.Street,f.HouseNumber,f.RoomNumber,f.Description,f.City.Id)
-
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(&f)
 		if err != nil {
 			log.Fatal(err)
 		}
+
 	}
 }
 
-func createFlat(w http.ResponseWriter, r *http.Request) {
+func updateFlat(w http.ResponseWriter, r *http.Request) {
 	var f Flat
 
-	query := "INSERT INTO flats (id,street,house_number,room_number,description,city_id) VALUES ($1,$2,$3,$4,$5,$6)"
+	params := mux.Vars(r)
 
-	insert, err := conn.Query(context.Background(), query, f.Id, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer insert.Close()
+	query := "UPDATE flats SET street = $1, house_number = $2, room_number = $3, description = $4, city_id = $5 WHERE id =$6 "
 
-	w.Header().Set("Content-Type", "application/json")
-	err = json.NewDecoder(r.Body).Decode(f)
+	_, err := conn.Exec(context.Background(), query, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.Id, params["id"])
 	if err != nil {
 		log.Fatal(err)
 	}

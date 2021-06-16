@@ -103,29 +103,25 @@ func getFlats(w http.ResponseWriter, r *http.Request) {
 func getFlat(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
-	rows, _ := conn.Query(context.Background(), "SELECT * FROM flats WHERE id=$1", params["id"])
-	defer rows.Close()
-
 	var f Flat
 
-	for rows.Next() {
-		err := rows.Scan(
-			&f.Id,
-			&f.Street,
-			&f.HouseNumber,
-			&f.RoomNumber,
-			&f.Description,
-			&f.City.Id)
-		if err != nil {
-			log.Fatal(err)
-		}
-		//fmt.Printf("%d, %s,%s,%d,%s,%d\n", f.Id, f.Street,f.HouseNumber,f.RoomNumber,f.Description,f.City.Id)
-		w.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(&f)
-		if err != nil {
-			log.Fatal(err)
-		}
+	err := conn.QueryRow(context.Background(), "SELECT * FROM flats WHERE id=$1", params["id"]).Scan(
+		&f.Id,
+		&f.Street,
+		&f.HouseNumber,
+		&f.RoomNumber,
+		&f.Description,
+		&f.City.Id)
 
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(&f)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -134,12 +130,20 @@ func updateFlat(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 
-	query := "UPDATE flats SET street = $1, house_number = $2, room_number = $3, description = $4, city_id = $5 WHERE id =$6 "
-
-	_, err := conn.Exec(context.Background(), query, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.Id, params["id"])
+	w.Header().Set("Content-Type", "application/json")
+	err := json.NewDecoder(r.Body).Decode(&f)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	query := "UPDATE flats SET street = $1, house_number = $2, room_number = $3, description = $4, city_id = $5 WHERE id =$6 "
+
+	_, err = conn.Exec(context.Background(), query, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.Id, params["id"])
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
 }
 
 func deleteFlat(w http.ResponseWriter, r *http.Request) {

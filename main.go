@@ -75,7 +75,8 @@ func createFlat(w http.ResponseWriter, r *http.Request) {
 }
 
 func getFlats(w http.ResponseWriter, r *http.Request) {
-	rows, _ := conn.Query(context.Background(), "SELECT * FROM flats")
+	rows, _ := conn.Query(context.Background(),
+		"SELECT flats.id,flats.street,flats.house_number,flats.room_number,flats.description,cities.id,cities.country_name,cities.city_name FROM flats LEFT JOIN cities ON flats.city_id=cities.id")
 	defer rows.Close()
 
 	var f Flat
@@ -86,7 +87,9 @@ func getFlats(w http.ResponseWriter, r *http.Request) {
 			&f.HouseNumber,
 			&f.RoomNumber,
 			&f.Description,
-			&f.City.Id)
+			&f.City.Id,
+			&f.City.Country,
+			&f.City.Name)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -105,13 +108,16 @@ func getFlat(w http.ResponseWriter, r *http.Request) {
 
 	var f Flat
 
-	err := conn.QueryRow(context.Background(), "SELECT * FROM flats WHERE id=$1", params["id"]).Scan(
+	err := conn.QueryRow(context.Background(),
+		"SELECT * FROM flats LEFT JOIN cities ON flats.city_id = cities.id", params["id"]).Scan(
 		&f.Id,
 		&f.Street,
 		&f.HouseNumber,
 		&f.RoomNumber,
 		&f.Description,
-		&f.City.Id)
+		&f.City.Id,
+		&f.City.Country,
+		&f.City.Name)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

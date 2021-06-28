@@ -1,9 +1,10 @@
 server:
-  flats: "8080"
+  port: "8080"
 
 db:
   user: "postgres"
   password: "1234567"
   hostname: "localhost"
-  port: "5432"
+  port: "8080"
   database: "postgres"
+

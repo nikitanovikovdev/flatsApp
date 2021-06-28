@@ -14,3 +14,4 @@ type City struct {
 	Country string `json:"country"`
 	Name    string `json:"name"`
 }
+

@@ -1,15 +1,27 @@
 package flatApp
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 type Server struct {
 	srv http.Server
 }
 
-func NewServer(port string) *Server {
+func NewServer(port string, h http.Handler) *Server {
 	return &Server{
 		srv: http.Server{
-			Addr: ":" + port,
+			Addr:    ":" + port,
+			Handler: h,
 		},
 	}
+}
+
+func (s *Server) Run() error {
+	if err := s.srv.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
+
+	return nil
 }

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"flatApp"
 	"flatApp/pkg/flats"
 	"flatApp/pkg/platform/repository"
-	"fmt"
 	_ "github.com/jackc/pgx/v4"
 	"github.com/spf13/viper"
 	"log"
@@ -32,6 +32,12 @@ func main() {
 	}
 
 	repo := flats.NewRepository(db)
-	fmt.Println(repo)
+	service := flats.NewService(repo)
+	handler := flats.NewHandler(service)
+
+	server := flatApp.NewServer(viper.GetString("server.port"), flats.NewRouter(handler))
+	if err = server.Run(); err != nil {
+		log.Fatal(err)
+	}
 
 }

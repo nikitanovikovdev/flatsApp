@@ -2,10 +2,12 @@ package flats
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Handler struct {
@@ -20,6 +22,9 @@ func NewHandler(s *Service) *Handler {
 
 func (h *Handler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			return
@@ -35,13 +40,9 @@ func (h *Handler) Create() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-
 		if _, err := w.Write(message); err != nil {
 			log.Println(err.Error())
 		}
-
 	}
 }
 
@@ -49,12 +50,13 @@ func (h *Handler) Read() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := mux.Vars(r)["id"]
 
-		ids, err := h.service.Read(r.Context(), id)
+		flat, err := h.service.Read(r.Context(), id)
 		if err != nil {
+			fmt.Println("handler read error")
 			return
 		}
 
-		message, err := json.Marshal(ids)
+		message, err := json.Marshal(flat)
 		if err != nil {
 			return
 		}

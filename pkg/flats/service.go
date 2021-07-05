@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"flatApp/pkg/platform/flat"
-	"log"
+	"fmt"
 )
 
 type Service struct {
@@ -17,11 +17,11 @@ func NewService(r *Repository) *Service {
 	}
 }
 
-func (s *Service) Create(ctx context.Context, f []byte) ([]string, error) {
-	var flats []flat.Flat
+func (s *Service) Create(ctx context.Context, f []byte) (string, error) {
+	var flats flat.Flat
 
 	if err := json.Unmarshal(f, &flats); err != nil {
-		log.Fatal(err)
+		fmt.Println(err.Error())
 	}
 
 	return s.repo.Create(ctx, flats)
@@ -42,7 +42,7 @@ func (s *Service) Update(ctx context.Context, id string, f []byte) error {
 		return err
 	}
 
-	return s.repo.Update(ctx, id, fl)
+	return s.repo.Update(ctx, id, &fl)
 }
 
 func (s *Service) Delete(ctx context.Context, id string) error {

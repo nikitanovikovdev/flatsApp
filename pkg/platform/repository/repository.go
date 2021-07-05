@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/jackc/pgx/v4"
+	_ "github.com/jackc/pgx/stdlib"
 )
 
 type Config struct {
@@ -11,21 +11,20 @@ type Config struct {
 	Password string
 	Hostname string
 	Port     string
-	Database string
-	SSLMode  string
+	DBName   string
 }
 
-func NewPostgresDB(c Config) (*sql.DB, error) {
+func NewPostgresDB(c *Config) (*sql.DB, error) {
 	conn := fmt.Sprintf(
-		"postgres://%v:%v@%v:%v/%v?sslmode=%v",
+		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
 		c.User,
 		c.Password,
 		c.Hostname,
 		c.Port,
-		c.Database,
-		c.SSLMode)
+		c.DBName,
+	)
 
-	db, err := sql.Open("postgres", conn)
+	db, err := sql.Open("pgx", conn)
 	if err != nil {
 		return &sql.DB{}, err
 	}

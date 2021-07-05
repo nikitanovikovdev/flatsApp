@@ -1,11 +1,12 @@
 server:
   port: "8080"
+  hostname: "localhost"
 
 db:
   user: "postgres"
   password: "123456"
   hostname: "localhost"
-  port: "8080"
-  database: "flats"
-  sslmode: "disable"
+  port: "5432"
+  dbname: "postgres"
+
 

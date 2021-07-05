@@ -1,4 +1,4 @@
-package flatApp
+package internal
 
 import (
 	"log"

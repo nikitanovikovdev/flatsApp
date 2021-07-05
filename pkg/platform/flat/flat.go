@@ -1,7 +1,7 @@
 package flat
 
 type Flat struct {
-	Id          int    `json:"id"`
+	ID          int    `json:"id"`
 	Street      string `json:"street"`
 	HouseNumber string `json:"house_number"`
 	RoomNumber  int    `json:"room_number"`
@@ -10,8 +10,7 @@ type Flat struct {
 }
 
 type City struct {
-	Id      int    `json:"id"`
+	ID      int    `json:"id"`
 	Country string `json:"country"`
 	Name    string `json:"name"`
 }
-

@@ -1,0 +1,1 @@
+INSERT INTO cities (country_name, city_name) VALUES ('Belarus', 'Minsk');

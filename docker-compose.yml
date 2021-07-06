@@ -1,0 +1,25 @@
+version: '3.6'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_flats
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+      - ./migrations/000001_create_flats_table.up.sql:/docker-entrypoint-initdb.d/000001_create_flats_table.up.sql
+
+#  flats:
+#    image: belka256/flatsapp:latest
+#    ports:
+#      - 8000:8000
+#    links:
+#      - db
+
+volumes:
+  psql_data:

@@ -24,7 +24,7 @@ func (s *Service) Create(ctx context.Context, f []byte) (string, error) {
 		fmt.Println(err.Error())
 	}
 
-	return s.repo.Create(ctx, flats)
+	return s.repo.Create(ctx, &flats)
 }
 
 func (s *Service) Read(ctx context.Context, id string) (flat.Flat, error) {

@@ -4,7 +4,7 @@ server:
 
 db:
   user: "postgres"
-  password: "123456"
+  password: "postgres"
   hostname: "localhost"
   port: "5432"
   dbname: "postgres"

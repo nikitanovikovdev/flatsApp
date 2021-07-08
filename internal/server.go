@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"log"
+	"github.com/pkg/errors"
 	"net/http"
 )
 
@@ -9,10 +9,10 @@ type Server struct {
 	srv http.Server
 }
 
-func NewServer(port string, h http.Handler) *Server {
+func NewServer(host, port string, h http.Handler) *Server {
 	return &Server{
 		srv: http.Server{
-			Addr:    ":" + port,
+			Addr:    host + ":" + port,
 			Handler: h,
 		},
 	}
@@ -20,7 +20,7 @@ func NewServer(port string, h http.Handler) *Server {
 
 func (s *Server) Run() error {
 	if err := s.srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
+		return errors.Wrap(err, "listening or serving failed")
 	}
 
 	return nil

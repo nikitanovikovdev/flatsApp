@@ -11,16 +11,19 @@ type WithError struct {
 }
 
 func Bad(w http.ResponseWriter, err error) {
-	w.WriteHeader(http.StatusBadRequest)
 	res := WithError{Error: err.Error()}
 	msg, err := json.Marshal(res)
 	if err != nil {
-		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
 	if _, err := w.Write(msg); err != nil {
-		log.Println(err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
+
+	w.WriteHeader(http.StatusBadRequest)
 }
 
 func Create(w http.ResponseWriter) {

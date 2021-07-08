@@ -14,5 +14,3 @@ CREATE TABLE flats
     description TEXT,
     city_id      INT         NOT NULL REFERENCES cities (id)
 );
-
-INSERT INTO cities (country_name, city_name) VALUES ('Belarus', 'Minsk');

@@ -8,23 +8,23 @@ import (
 )
 
 type Service struct {
-	repo *Repository
+	repo Repository
 }
 
-func NewService(r *Repository) *Service {
+func NewService(r *RepositorySQL) *Service {
 	return &Service{
 		repo: r,
 	}
 }
 
-func (s *Service) Create(ctx context.Context, f []byte) (string, error) {
+func (s *Service) Create(ctx context.Context, f []byte) (flat.Flat, error) {
 	var flats flat.Flat
 
 	if err := json.Unmarshal(f, &flats); err != nil {
 		fmt.Println(err.Error())
 	}
 
-	return s.repo.Create(ctx, &flats)
+	return s.repo.Create(ctx, flats)
 }
 
 func (s *Service) Read(ctx context.Context, id string) (flat.Flat, error) {
@@ -42,7 +42,7 @@ func (s *Service) Update(ctx context.Context, id string, f []byte) error {
 		return err
 	}
 
-	return s.repo.Update(ctx, id, &fl)
+	return s.repo.Update(ctx, id, fl)
 }
 
 func (s *Service) Delete(ctx context.Context, id string) error {

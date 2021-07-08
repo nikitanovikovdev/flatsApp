@@ -4,6 +4,7 @@ import (
 	"flatApp/internal"
 	"flatApp/pkg/flats"
 	"flatApp/pkg/platform/repository"
+	"github.com/pkg/errors"
 	"log"
 
 	"github.com/spf13/viper"
@@ -30,7 +31,7 @@ func main() {
 	service := flats.NewService(repo)
 	handler := flats.NewHandler(service)
 
-	server := internal.NewServer(viper.GetString("server.port"), flats.NewRouter(handler))
+	server := internal.NewServer(viper.GetString("server.host"), viper.GetString("server.port"), flats.NewRouter(handler))
 	if err = server.Run(); err != nil {
 		log.Fatal(err)
 	}
@@ -41,5 +42,5 @@ func initConfig() error {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
 
-	return viper.ReadInConfig()
+	return errors.Wrap(viper.ReadInConfig(), "error reading config")
 }

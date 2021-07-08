@@ -12,7 +12,6 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - psql_data:/var/lib/postgresql/data
-      - ./migrations/000001_create_flats_table.up.sql:/docker-entrypoint-initdb.d/000001_create_flats_table.up.sql
 
 #  flats:
 #    image: belka256/flatsapp:latest

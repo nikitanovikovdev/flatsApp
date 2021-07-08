@@ -33,6 +33,7 @@ func (h *Handler) Create() http.HandlerFunc {
 			return
 		}
 
+		// todo: specify error handling
 		message, err := json.Marshal(ids)
 		if err != nil {
 			response.Bad(w, err)

@@ -13,16 +13,18 @@ type Config struct {
 	Hostname string
 	Port     string
 	DBName   string
+	Schema 	 string
 }
 
 func NewPostgresDB(c *Config) (*sql.DB, error) {
 	conn := fmt.Sprintf(
-		"postgres://%v:%v@%v:%v/%v?sslmode=disable",
+		"postgres://%v:%v@%v:%v/%v?sslmode=disable&search_path=%s, public",
 		c.User,
 		c.Password,
 		c.Hostname,
 		c.Port,
 		c.DBName,
+		c.Schema,
 	)
 
 	db, err := sql.Open("pgx", conn)

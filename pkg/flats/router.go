@@ -23,6 +23,7 @@ func (r *Router) initRoutes() http.Handler {
 
 	m.HandleFunc("/flats", r.handler.Create()).Methods("POST")
 	m.HandleFunc("/flats/{id}", r.handler.Read()).Methods("GET")
+	m.HandleFunc("/flats", r.handler.ReadAll()).Methods("GET")
 	m.HandleFunc("/flats/{id}", r.handler.Update()).Methods("PUT")
 	m.HandleFunc("/flats/{id}", r.handler.Delete()).Methods("DELETE")
 

@@ -1,2 +1,0 @@
-DROP TABLE  IF EXISTS cities;
-DROP TABLE IF EXISTS flats;

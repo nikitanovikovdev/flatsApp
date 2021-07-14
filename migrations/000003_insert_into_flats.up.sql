@@ -1,0 +1,1 @@
+INSERT INTO flats VALUES (1,'Lenina', '77A', 33, 'good flat', 1);

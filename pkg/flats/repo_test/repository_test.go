@@ -40,8 +40,8 @@ func TestCreate(t *testing.T) {
 		//},
 	}
 
-	repo, cleanup := database.CreateTestFlatsRepository(t,"TestFlat")
-	defer cleanup()
+	repo := database.CreateTestFlatsRepository("TestFlat")
+
 
 	expectedResult := flat.Flat{
 		ID: 0,

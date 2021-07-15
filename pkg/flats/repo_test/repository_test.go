@@ -22,22 +22,22 @@ var ctx context.Context
 //			name: "should create flat",
 //			body: testData.TrueData,
 //		},
-		//{
-		//	name:   "shouldn't create flat without street",
-		//	body:   testData.GiveDataWithoutStreet(),
-		//	status: http.StatusBadRequest,
-		//},
-		//{
-		//	name:   "shouldn't create flat without house_number",
-		//	body:   testData.GiveDataWithoutHouseNumber(),
-		//	status: http.StatusBadRequest,
-		//},
-		//{
-		//	name:   "shouldn't create flat without room_number",
-		//	body:   testData.GiveDataWithoutRoomNumber(),
-		//	status: http.StatusBadRequest,
-		//},
-	//}
+//{
+//	name:   "shouldn't create flat without street",
+//	body:   testData.GiveDataWithoutStreet(),
+//	status: http.StatusBadRequest,
+//},
+//{
+//	name:   "shouldn't create flat without house_number",
+//	body:   testData.GiveDataWithoutHouseNumber(),
+//	status: http.StatusBadRequest,
+//},
+//{
+//	name:   "shouldn't create flat without room_number",
+//	body:   testData.GiveDataWithoutRoomNumber(),
+//	status: http.StatusBadRequest,
+//},
+//}
 
 //	repo, cleanup := database.CreateTestFlatsRepository("creatFlat")
 //	defer cleanup()

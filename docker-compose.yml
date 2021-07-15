@@ -12,7 +12,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - psql_data:/var/lib/postgresql/data
-      - ./migrations/000001_create_flats_table.up.sql:/docker-entrypoint-initdb.d/000001_create_flats_table.up.sql
+      - ./migrations/000001_create_flats.up.sql:/docker-entrypoint-initdb.d/000001_create_flats.up.sql
       - ./migrations/000003_insert_into_cities.up.sql:/docker-entrypoint-initdb.d/000003_insert_into_cities.up.sql
 
 

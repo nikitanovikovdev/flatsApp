@@ -28,7 +28,7 @@ func (h *Handler) Create() http.HandlerFunc {
 
 		flat, err := h.service.Create(r.Context(), body)
 		if err != nil {
-			response.DevError(w, err)
+			response.UserError(w, err)
 			return
 		}
 

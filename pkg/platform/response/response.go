@@ -11,35 +11,33 @@ type WithError struct {
 }
 
 func UserError(w http.ResponseWriter, err error) {
-	res := WithError{Error: err.Error()}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
+	res := &WithError{Error: err.Error()}
 	msg, err := json.Marshal(res)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		log.Println(err.Error())
 	}
 
-	if _, err := w.Write(msg); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+	if _, err = w.Write(msg); err != nil {
+		log.Println(err.Error())
 	}
-
-	w.WriteHeader(http.StatusBadRequest)
 }
 
 func DevError(w http.ResponseWriter, err error) {
-	res := WithError{Error: err.Error()}
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+
+	res := &WithError{Error: err.Error()}
 	msg, err := json.Marshal(res)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		log.Println(err.Error())
 	}
 
-	if _, err := w.Write(msg); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if _, err = w.Write(msg); err != nil {
+		log.Println(err.Error())
 	}
-
-	w.WriteHeader(http.StatusInternalServerError)
 }
 
 func Create(w http.ResponseWriter) {

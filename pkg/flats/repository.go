@@ -32,11 +32,11 @@ func (r *RepositorySQL) Create(ctx context.Context, f flat.Flat) (flat.Flat, err
 
 	stmt, err := r.db.PrepareContext(ctx, createQuery)
 	if err != nil {
-		return fl, errors.Wrap(err, "creating stmt for Repository.Create failed")
+		return fl, errors.Wrap(err, "creating flat failed")
 	}
 
 	if err := stmt.QueryRowContext(ctx, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID).Scan(&fl.Street, &fl.HouseNumber, &fl.RoomNumber, &fl.Description, &fl.City.ID); err != nil {
-		return fl, errors.Wrap(err, "failed to add data from Repository.Create to structure")
+		return fl, errors.Wrap(err, "creating flat failed")
 	}
 
 	return fl, nil
@@ -116,7 +116,7 @@ func (r *RepositorySQL) Update(ctx context.Context, id string, f flat.Flat) erro
 }
 
 func (r *RepositorySQL) Delete(ctx context.Context, id string) error {
-	deleteQuery := "DELETE FROM flats WHERE id=$1"
+	deleteQuery := "DELETE FROM flats WHERE id = $1"
 
 	stmt, err := r.db.PrepareContext(ctx, deleteQuery)
 	if err != nil {

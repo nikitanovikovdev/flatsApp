@@ -2,20 +2,17 @@ package testData
 
 import "flatApp/pkg/platform/flat"
 
-func GiveTrueData() flat.Flat{
-	return flat.Flat{
-		Street: "Koroleva",
-		HouseNumber: "12A",
-		RoomNumber: 61,
-		Description: "good flat in Minsk",
-		City: flat.City{
-			ID: 1,
-		},
-	}
+var TrueData = flat.Flat{
+	Street: "Koroleva",
+	HouseNumber: "12A",
+	RoomNumber: 61,
+	Description: "good flat in Minsk",
+	City: flat.City{
+		ID: 1,
+	},
 }
 
-func GiveDataWithoutStreet() flat.Flat{
-	return flat.Flat{
+var GiveDataWithoutStreet = flat.Flat{
 		Street: " ",
 		HouseNumber: "12A",
 		RoomNumber: 61,
@@ -24,10 +21,9 @@ func GiveDataWithoutStreet() flat.Flat{
 			ID: 1,
 		},
 	}
-}
 
-func GiveDataWithoutHouseNumber() flat.Flat{
-	return flat.Flat{
+
+var GiveDataWithoutHouseNumber = flat.Flat{
 		Street: "Koroleva",
 		HouseNumber: " ",
 		RoomNumber: 61,
@@ -36,10 +32,9 @@ func GiveDataWithoutHouseNumber() flat.Flat{
 			ID: 1,
 		},
 	}
-}
 
-func GiveDataWithoutRoomNumber() flat.Flat{
-	return flat.Flat{
+
+var GiveDataWithoutRoomNumber = flat.Flat{
 		Street: "Koroleva",
 		HouseNumber: "12A ",
 		RoomNumber: 0,
@@ -48,4 +43,3 @@ func GiveDataWithoutRoomNumber() flat.Flat{
 			ID: 1,
 		},
 	}
-}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"flatApp/pkg/platform/flat"
-	"github.com/pkg/errors"
 )
 
 type RepositorySQL struct {
@@ -32,11 +31,11 @@ func (r *RepositorySQL) Create(ctx context.Context, f flat.Flat) (flat.Flat, err
 
 	stmt, err := r.db.PrepareContext(ctx, createQuery)
 	if err != nil {
-		return fl, errors.Wrap(err, "creating flat failed")
+		return fl, err
 	}
 
 	if err := stmt.QueryRowContext(ctx, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID).Scan(&fl.Street, &fl.HouseNumber, &fl.RoomNumber, &fl.Description, &fl.City.ID); err != nil {
-		return fl, errors.Wrap(err, "creating flat failed")
+		return fl, err
 	}
 
 	return fl, nil
@@ -49,7 +48,7 @@ func (r *RepositorySQL) Read(ctx context.Context, id string) (flat.Flat, error) 
 
 	stmt, err := r.db.PrepareContext(ctx, readQuery)
 	if err != nil {
-		return flat.Flat{}, errors.Wrap(err, "creating stmt for Repository.Read failed")
+		return flat.Flat{}, err
 	}
 	var f flat.Flat
 
@@ -62,7 +61,7 @@ func (r *RepositorySQL) Read(ctx context.Context, id string) (flat.Flat, error) 
 		&f.City.ID,
 		&f.City.Country,
 		&f.City.Name); err != nil {
-		return f, errors.Wrap(err, "user with this id was not found")
+		return f, err
 	}
 	return f, nil
 }
@@ -76,8 +75,9 @@ func (r *RepositorySQL) ReadAll(ctx context.Context) ([]flat.Flat, error) {
 	var f flat.Flat
 
 	rows, err := r.db.QueryContext(ctx, readAllFlatQuery)
+
 	if err != nil {
-		return []flat.Flat{}, errors.Wrap(err, "creating rows for Repository.ReadAll failed")
+		return []flat.Flat{}, err
 	}
 
 	for rows.Next() {
@@ -91,7 +91,7 @@ func (r *RepositorySQL) ReadAll(ctx context.Context) ([]flat.Flat, error) {
 			&f.City.Country,
 			&f.City.Name)
 		if err != nil {
-			return flats, errors.Wrap(err, "user with this id was not found")
+			return flats, err
 		}
 
 		flats = append(flats, f)
@@ -105,11 +105,11 @@ func (r *RepositorySQL) Update(ctx context.Context, id string, f flat.Flat) erro
 
 	stmt, err := r.db.PrepareContext(ctx, updateQuery)
 	if err != nil {
-		return errors.Wrap(err, "creating stmt for Repository.Update failed")
+		return err
 	}
 
 	if _, err := stmt.ExecContext(ctx, id, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID); err != nil {
-		return errors.Wrap(err, "failed to update data from Repository.Update")
+		return err
 	}
 
 	return nil
@@ -119,12 +119,13 @@ func (r *RepositorySQL) Delete(ctx context.Context, id string) error {
 	deleteQuery := "DELETE FROM flats WHERE id = $1"
 
 	stmt, err := r.db.PrepareContext(ctx, deleteQuery)
+
 	if err != nil {
-		return errors.Wrap(err, "creating stmt for Repository.Delete failed")
+		return err
 	}
 
 	if _, err := stmt.ExecContext(ctx, id); err != nil {
-		return errors.Wrap(err, "failed to delete data from Repository.Delete")
+		return err
 	}
 
 	return nil

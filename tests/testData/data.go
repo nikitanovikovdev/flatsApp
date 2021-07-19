@@ -1,8 +1,12 @@
 package testData
 
-import "flatApp/pkg/platform/flat"
+import (
+	"encoding/json"
+	"flatApp/pkg/platform/flat"
+	"log"
+)
 
-var TrueData = flat.Flat{
+var GiveTrueDataForRepo = flat.Flat{
 	Street: "Koroleva",
 	HouseNumber: "12A",
 	RoomNumber: 61,
@@ -43,3 +47,25 @@ var GiveDataWithoutRoomNumber = flat.Flat{
 			ID: 1,
 		},
 	}
+
+
+var GiveTrueDataForService = flat.Flat{
+	Street: "Mira",
+	HouseNumber: "99",
+	RoomNumber: 98,
+	Description: "test description",
+	City: flat.City{
+		ID: 2,
+	},
+}
+
+
+func ConvertToBytes(f flat.Flat) []byte{
+	body, err := json.Marshal(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return body
+}
+

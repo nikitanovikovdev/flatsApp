@@ -23,20 +23,18 @@ func (h *Handler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			response.Bad(w, err)
+			response.UserError(w, err)
 			return
 		}
 
 		ids, err := h.service.Create(r.Context(), body)
 		if err != nil {
-			response.Bad(w, err)
+			response.DevError(w, err)
 			return
 		}
-
-		// todo: specify error handling
 		message, err := json.Marshal(ids)
 		if err != nil {
-			response.Bad(w, err)
+			response.DevError(w, err)
 			return
 		}
 
@@ -50,13 +48,13 @@ func (h *Handler) Read() http.HandlerFunc {
 
 		flat, err := h.service.Read(r.Context(), id)
 		if err != nil {
-			response.Bad(w, err)
+			response.UserError(w, err)
 			return
 		}
 
 		message, err := json.Marshal(flat)
 		if err != nil {
-			response.Bad(w, err)
+			response.DevError(w, err)
 			return
 		}
 
@@ -68,14 +66,14 @@ func (h *Handler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			response.Bad(w, err)
+			response.UserError(w, err)
 			return
 		}
 
-		vin := mux.Vars(r)["id"]
+		id := mux.Vars(r)["id"]
 
-		if err := h.service.Update(r.Context(), vin, body); err != nil {
-			response.Bad(w, err)
+		if err := h.service.Update(r.Context(), id, body); err != nil {
+			response.DevError(w, err)
 			return
 		}
 

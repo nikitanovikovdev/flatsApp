@@ -1,4 +1,4 @@
 .idea
-.config.yaml
-.cover.out
-.cmd/.idea
+config.yaml
+cover.out
+cmd/.idea

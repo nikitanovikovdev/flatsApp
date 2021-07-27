@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"flatApp/pkg/platform/flat"
-	"fmt"
 )
 
 type Service struct {
@@ -18,21 +17,30 @@ func NewService(r *RepositorySQL) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, f []byte) (flat.Flat, error) {
-	var flats flat.Flat
+	var fl flat.Flat
 
-	if err := json.Unmarshal(f, &flats); err != nil {
-		fmt.Println(err.Error())
+	if err := json.Unmarshal(f, &fl); err != nil {
+		return fl, err
 	}
 
-	return s.repo.Create(ctx, flats)
+	return s.repo.Create(ctx, fl)
 }
 
 func (s *Service) Read(ctx context.Context, id string) (flat.Flat, error) {
-	f, err := s.repo.Read(ctx, id)
+	fl, err := s.repo.Read(ctx, id)
 	if err != nil {
-		return flat.Flat{}, err
+		return fl, err
 	}
-	return f, nil
+	return fl, nil
+}
+
+func (s *Service) ReadAll(ctx context.Context) ([]flat.Flat, error) {
+	fl, err := s.repo.ReadAll(ctx)
+	if err != nil {
+		return fl, err
+	}
+
+	return fl, err
 }
 
 func (s *Service) Update(ctx context.Context, id string, f []byte) error {
@@ -46,5 +54,8 @@ func (s *Service) Update(ctx context.Context, id string, f []byte) error {
 }
 
 func (s *Service) Delete(ctx context.Context, id string) error {
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return err
+	}
 	return s.repo.Delete(ctx, id)
 }

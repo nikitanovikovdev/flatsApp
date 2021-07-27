@@ -12,13 +12,9 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - psql_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
 
-#  flats:
-#    image: belka256/flatsapp:latest
-#    ports:
-#      - 8000:8000
-#    links:
-#      - db
+
 
 volumes:
   psql_data:

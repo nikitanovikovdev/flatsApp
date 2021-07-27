@@ -21,6 +21,7 @@ func main() {
 		Hostname: viper.GetString("db.hostname"),
 		Port:     viper.GetString("db.port"),
 		DBName:   viper.GetString("db.dbname"),
+		Schema:   viper.GetString("db.schema"),
 	})
 
 	if err != nil {

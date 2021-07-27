@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"flatApp/pkg/platform/flat"
-	"fmt"
 )
 
 type RepositorySQL struct {
@@ -14,6 +13,7 @@ type RepositorySQL struct {
 type Repository interface {
 	Create(ctx context.Context, f flat.Flat) (flat.Flat, error)
 	Read(ctx context.Context, id string) (flat.Flat, error)
+	ReadAll(ctx context.Context) ([]flat.Flat, error)
 	Update(ctx context.Context, id string, f flat.Flat) error
 	Delete(ctx context.Context, id string) error
 }
@@ -25,21 +25,20 @@ func NewRepository(db *sql.DB) *RepositorySQL {
 }
 
 func (r *RepositorySQL) Create(ctx context.Context, f flat.Flat) (flat.Flat, error) {
-	createQuery := "INSERT INTO flats (street,house_number,room_number,description,city_id) VALUES ($1,$2,$3,$4,$5) RETURNING street"
+	createQuery := "INSERT INTO flats (street,house_number,room_number,description,city_id) VALUES ($1,$2,$3,$4,$5) RETURNING street,house_number,room_number,description,city_id"
 
-	var street string
+	var fl flat.Flat
 
 	stmt, err := r.db.PrepareContext(ctx, createQuery)
 	if err != nil {
-		street = "failed to create"
-		return f, err
+		return fl, err
 	}
 
-	if err := stmt.QueryRowContext(ctx, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID).Scan(&street); err != nil {
-		fmt.Println(err.Error())
+	if err := stmt.QueryRowContext(ctx, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID).Scan(&fl.Street, &fl.HouseNumber, &fl.RoomNumber, &fl.Description, &fl.City.ID); err != nil {
+		return fl, err
 	}
 
-	return f, nil
+	return fl, nil
 }
 
 func (r *RepositorySQL) Read(ctx context.Context, id string) (flat.Flat, error) {
@@ -62,9 +61,43 @@ func (r *RepositorySQL) Read(ctx context.Context, id string) (flat.Flat, error) 
 		&f.City.ID,
 		&f.City.Country,
 		&f.City.Name); err != nil {
-		return flat.Flat{}, nil
+		return f, err
 	}
 	return f, nil
+}
+
+func (r *RepositorySQL) ReadAll(ctx context.Context) ([]flat.Flat, error) {
+	readAllFlatQuery := "SELECT flats.id,flats.street,flats.house_number,flats.room_number," +
+		"flats.description,cities.id,cities.country_name,cities.city_name" +
+		" FROM flats LEFT JOIN cities ON flats.city_id=cities.id"
+
+	var flats []flat.Flat
+	var f flat.Flat
+
+	rows, err := r.db.QueryContext(ctx, readAllFlatQuery)
+
+	if err != nil {
+		return []flat.Flat{}, err
+	}
+
+	for rows.Next() {
+		err := rows.Scan(
+			&f.ID,
+			&f.Street,
+			&f.HouseNumber,
+			&f.RoomNumber,
+			&f.Description,
+			&f.City.ID,
+			&f.City.Country,
+			&f.City.Name)
+		if err != nil {
+			return flats, err
+		}
+
+		flats = append(flats, f)
+	}
+
+	return flats, nil
 }
 
 func (r *RepositorySQL) Update(ctx context.Context, id string, f flat.Flat) error {
@@ -76,16 +109,17 @@ func (r *RepositorySQL) Update(ctx context.Context, id string, f flat.Flat) erro
 	}
 
 	if _, err := stmt.ExecContext(ctx, id, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID); err != nil {
-		fmt.Println(err.Error())
+		return err
 	}
 
 	return nil
 }
 
 func (r *RepositorySQL) Delete(ctx context.Context, id string) error {
-	deleteQuery := "DELETE FROM flats WHERE id=$1"
+	deleteQuery := "DELETE FROM flats WHERE id = $1"
 
 	stmt, err := r.db.PrepareContext(ctx, deleteQuery)
+
 	if err != nil {
 		return err
 	}

@@ -10,20 +10,34 @@ type WithError struct {
 	Error string `json:"error"`
 }
 
-func Bad(w http.ResponseWriter, err error) {
-	res := WithError{Error: err.Error()}
+func UserError(w http.ResponseWriter, err error) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
+	res := &WithError{Error: err.Error()}
 	msg, err := json.Marshal(res)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		log.Println(err.Error())
 	}
 
-	if _, err := w.Write(msg); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	if _, err = w.Write(msg); err != nil {
+		log.Println(err.Error())
+	}
+}
+
+func DevError(w http.ResponseWriter, err error) {
+	w.Header().Set("Content-type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+
+	res := &WithError{Error: err.Error()}
+	msg, err := json.Marshal(res)
+	if err != nil {
+		log.Println(err.Error())
 	}
 
-	w.WriteHeader(http.StatusBadRequest)
+	if _, err = w.Write(msg); err != nil {
+		log.Println(err.Error())
+	}
 }
 
 func Create(w http.ResponseWriter) {
@@ -51,3 +65,4 @@ func OkWithMessage(w http.ResponseWriter, message []byte) {
 		log.Println(err.Error())
 	}
 }
+

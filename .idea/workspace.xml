@@ -15,8 +15,7 @@
       <change afterPath="$PROJECT_DIR$/pkg/flats/handler_test.go" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/pkg/flats/repository_test.go" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/pkg/flats/service_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/database/database.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tests/testData/data.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/web/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/web/main.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />

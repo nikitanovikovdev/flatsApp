@@ -2,6 +2,10 @@ server:
   port: "8080"
   hostname: "localhost"
 
+server_user:
+  port: "8100"
+  hostname: "localhost"
+
 db:
   user: "postgres"
   password: "postgres"
@@ -9,3 +13,11 @@ db:
   port: "5432"
   dbname: "postgres"
   schema: "flats"
+
+mongodb:
+  host: "localhost"
+  port: "27017"
+
+keys:
+  signing_key: "sfgsg34gegmh14hgedh"
+  salt: "qwet4356hj-4b123"

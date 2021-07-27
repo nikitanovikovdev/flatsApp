@@ -1,3 +1,5 @@
-.idea
-/config
-config.*.yaml
+cmd/.idea
+config.yaml
+cover.out
+pkg/flats/cover.out
+.env

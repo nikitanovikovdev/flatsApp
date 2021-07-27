@@ -6,36 +6,37 @@ import (
 	"flatApp/pkg/platform/flat"
 	"flatApp/tests/database"
 	"flatApp/tests/testData"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRepository_Create(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name string
-		body flat.Flat
+		name          string
+		body          flat.FlatWithUsername
 		expectedError bool
 	}{
 		{
-			name: "should create flat",
-			body: testData.GiveTrueDataForRepo,
+			name:          "should create flat",
+			body:          testData.GiveTrueDataForRepo,
 			expectedError: false,
 		},
 		{
-			name: "shouldn't create flat without street",
-			body: testData.GiveDataWithoutStreet,
+			name:          "shouldn't create flat without street",
+			body:          testData.GiveDataWithoutStreet,
 			expectedError: true,
 		},
 		{
-			name: "shouldn't create flat without house_number",
-			body: testData.GiveDataWithoutHouseNumber,
+			name:          "shouldn't create flat without house_number",
+			body:          testData.GiveDataWithoutHouseNumber,
 			expectedError: true,
 		},
 		{
-			name: "shouldn't create flat without room_number",
-			body: testData.GiveDataWithoutRoomNumber,
+			name:          "shouldn't create flat without room_number",
+			body:          testData.GiveDataWithoutRoomNumber,
 			expectedError: true,
 		},
 	}
@@ -63,7 +64,7 @@ func TestRepository_Create(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, expectedResult,result)
+				assert.Equal(t, expectedResult, result)
 			}
 		})
 	}
@@ -124,40 +125,39 @@ func TestRepository_Read(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name string
-		id   string
+		name          string
+		username      flat.Username
 		expectedError bool
 	}{
 		{
-			name: "should return flat",
-			id:   "1",
+			name:          "should return flat",
+			username:      testData.GiveCorrectUsername,
 			expectedError: false,
-		},
-		{
-			name: "shouldn't return flat",
-			id:   "12",
-			expectedError: true,
 		},
 	}
 
 	repo, cleanup := database.CreateTestFlatsRepository("readFlat")
 	defer cleanup()
 
-	expectedResult := flat.Flat{
-		ID:          1,
-		Street:      "Lenina",
-		HouseNumber: "77A",
-		RoomNumber:  33,
-		Description: "good flat",
-		City: flat.City{
-			ID:      1,
-			Country: "Belarus",
-			Name:    "Minsk",
+	expectedResult := []flat.Flat(
+		[]flat.Flat{
+			{
+				ID:          2,
+				Street:      "Tolstogo",
+				HouseNumber: "13",
+				RoomNumber:  71,
+				Description: "",
+				City: flat.City{
+					ID:      2,
+					Country: "Belarus",
+					Name:    "Brest",
+				},
+			},
 		},
-	}
+	)
 
 	for _, tc := range tests {
-		result, err := repo.Read(ctx, tc.id)
+		result, err := repo.Read(ctx, tc.username)
 		if tc.expectedError {
 			assert.Error(t, err)
 		} else {
@@ -173,7 +173,7 @@ func TestRepository_Update(t *testing.T) {
 	tests := []struct {
 		name string
 		id   string
-		body flat.Flat
+		body flat.FlatWithUsername
 	}{
 		{
 			name: "should update flat",
@@ -206,14 +206,17 @@ func TestRepository_Delete(t *testing.T) {
 	tests := []struct {
 		name string
 		id   string
+		usr  flat.Username
 	}{
 		{
 			name: "should delete flat",
 			id:   "2",
+			usr:  testData.GiveIncorrectUsername,
 		},
 		{
 			name: "shouldn't delete flat",
 			id:   "12",
+			usr:  testData.GiveIncorrectUsername,
 		},
 	}
 
@@ -222,7 +225,7 @@ func TestRepository_Delete(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := repo.Delete(ctx, tc.id)
+			err := repo.Delete(ctx, tc.id, tc.usr)
 			if err != nil {
 				assert.Errorf(t, err, "Incorrect result")
 			}

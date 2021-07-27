@@ -1,6 +1,7 @@
 package flats
 
 import (
+	"flatApp/pkg/platform/middlewear"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -21,11 +22,11 @@ func NewRouter(h *Handler) http.Handler {
 func (r *Router) initRoutes() http.Handler {
 	m := mux.NewRouter()
 
-	m.HandleFunc("/flats", r.handler.Create()).Methods("POST")
-	m.HandleFunc("/flats/{id}", r.handler.Read()).Methods("GET")
-	m.HandleFunc("/flats", r.handler.ReadAll()).Methods("GET")
-	m.HandleFunc("/flats/{id}", r.handler.Update()).Methods("PUT")
-	m.HandleFunc("/flats/{id}", r.handler.Delete()).Methods("DELETE")
+	m.Handle("/flats", middlewear.IsAuthorized(r.handler.Create())).Methods(http.MethodPost)
+	m.Handle("/flats/", middlewear.IsAuthorized(r.handler.Read())).Methods(http.MethodGet)
+	m.Handle("/flats", middlewear.IsAuthorized(r.handler.ReadAll())).Methods(http.MethodGet)
+	m.Handle("/flats/{id}", middlewear.IsAuthorized(r.handler.Update())).Methods(http.MethodPut)
+	m.Handle("/flats/{id}", middlewear.IsAuthorized(r.handler.Delete())).Methods(http.MethodDelete)
 
 	return m
 }

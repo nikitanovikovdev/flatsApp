@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"flatApp/pkg/platform/flat"
+	"fmt"
 )
 
 type RepositorySQL struct {
@@ -11,11 +12,11 @@ type RepositorySQL struct {
 }
 
 type Repository interface {
-	Create(ctx context.Context, f flat.Flat) (flat.Flat, error)
-	Read(ctx context.Context, id string) (flat.Flat, error)
+	Create(ctx context.Context, f flat.FlatWithUsername) (flat.Flat, error)
+	Read(ctx context.Context, u flat.Username) ([]flat.Flat, error)
 	ReadAll(ctx context.Context) ([]flat.Flat, error)
-	Update(ctx context.Context, id string, f flat.Flat) error
-	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, id string, f flat.FlatWithUsername) error
+	Delete(ctx context.Context, id string, usr flat.Username) error
 }
 
 func NewRepository(db *sql.DB) *RepositorySQL {
@@ -24,8 +25,8 @@ func NewRepository(db *sql.DB) *RepositorySQL {
 	}
 }
 
-func (r *RepositorySQL) Create(ctx context.Context, f flat.Flat) (flat.Flat, error) {
-	createQuery := "INSERT INTO flats (street,house_number,room_number,description,city_id) VALUES ($1,$2,$3,$4,$5) RETURNING street,house_number,room_number,description,city_id"
+func (r *RepositorySQL) Create(ctx context.Context, f flat.FlatWithUsername) (flat.Flat, error) {
+	createQuery := "INSERT INTO flats (street,house_number,room_number,description,city_id, username) VALUES ($1,$2,$3,$4,$5,$6) RETURNING street,house_number,room_number,description,city_id"
 
 	var fl flat.Flat
 
@@ -34,36 +35,44 @@ func (r *RepositorySQL) Create(ctx context.Context, f flat.Flat) (flat.Flat, err
 		return fl, err
 	}
 
-	if err := stmt.QueryRowContext(ctx, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID).Scan(&fl.Street, &fl.HouseNumber, &fl.RoomNumber, &fl.Description, &fl.City.ID); err != nil {
+	if err := stmt.QueryRowContext(ctx, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID, f.Username.Username).Scan(&fl.Street, &fl.HouseNumber, &fl.RoomNumber, &fl.Description, &fl.City.ID); err != nil {
 		return fl, err
 	}
 
 	return fl, nil
 }
 
-func (r *RepositorySQL) Read(ctx context.Context, id string) (flat.Flat, error) {
+func (r *RepositorySQL) Read(ctx context.Context, u flat.Username) ([]flat.Flat, error) {
 	readQuery := "SELECT flats.id, flats.street, flats.house_number, flats.room_number, " +
 		"flats.description, cities.id, cities.country_name, cities.city_name " +
-		"FROM flats LEFT JOIN cities ON flats.city_id = cities.id WHERE flats.id = $1"
+		"FROM flats LEFT JOIN cities ON flats.city_id = cities.id WHERE username= $1"
+
+	var flats []flat.Flat
+	var f flat.Flat
 
 	stmt, err := r.db.PrepareContext(ctx, readQuery)
 	if err != nil {
-		return flat.Flat{}, err
+		return flats, err
 	}
-	var f flat.Flat
 
-	if err := stmt.QueryRowContext(ctx, id).Scan(
-		&f.ID,
-		&f.Street,
-		&f.HouseNumber,
-		&f.RoomNumber,
-		&f.Description,
-		&f.City.ID,
-		&f.City.Country,
-		&f.City.Name); err != nil {
-		return f, err
+	rows, err := stmt.QueryContext(ctx, u.Username)
+
+	for rows.Next() {
+		err := rows.Scan(
+			&f.ID,
+			&f.Street,
+			&f.HouseNumber,
+			&f.RoomNumber,
+			&f.Description,
+			&f.City.ID,
+			&f.City.Country,
+			&f.City.Name)
+		if err != nil {
+			return flats, err
+		}
+		flats = append(flats, f)
 	}
-	return f, nil
+	return flats, nil
 }
 
 func (r *RepositorySQL) ReadAll(ctx context.Context) ([]flat.Flat, error) {
@@ -100,23 +109,23 @@ func (r *RepositorySQL) ReadAll(ctx context.Context) ([]flat.Flat, error) {
 	return flats, nil
 }
 
-func (r *RepositorySQL) Update(ctx context.Context, id string, f flat.Flat) error {
-	updateQuery := "UPDATE flats SET street = $2, house_number = $3, room_number = $4, description = $5, city_id = $6  WHERE id =$1"
+func (r *RepositorySQL) Update(ctx context.Context, id string, f flat.FlatWithUsername) error {
+	updateQuery := "UPDATE flats SET street = $2, house_number = $3, room_number = $4, description = $5, city_id = $6  WHERE id =$1 AND username=$7"
 
 	stmt, err := r.db.PrepareContext(ctx, updateQuery)
 	if err != nil {
 		return err
 	}
 
-	if _, err := stmt.ExecContext(ctx, id, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID); err != nil {
+	if _, err := stmt.ExecContext(ctx, id, f.Street, f.HouseNumber, f.RoomNumber, f.Description, f.City.ID, f.Username.Username); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *RepositorySQL) Delete(ctx context.Context, id string) error {
-	deleteQuery := "DELETE FROM flats WHERE id = $1"
+func (r *RepositorySQL) Delete(ctx context.Context, id string, usr flat.Username) error {
+	deleteQuery := "DELETE FROM flats WHERE id = $1 AND username = $2"
 
 	stmt, err := r.db.PrepareContext(ctx, deleteQuery)
 
@@ -124,8 +133,8 @@ func (r *RepositorySQL) Delete(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := stmt.ExecContext(ctx, id); err != nil {
-		return err
+	if _, err := stmt.ExecContext(ctx, id, usr.Username); err != nil {
+		return fmt.Errorf("wasn't found id or username")
 	}
 
 	return nil

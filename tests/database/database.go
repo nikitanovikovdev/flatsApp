@@ -4,16 +4,15 @@ import (
 	"database/sql"
 	"flatApp/pkg/flats"
 	"fmt"
+	"log"
+
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/stdlib"
-	"log"
 )
 
-
-
-func CreateTestFlatsRepository(schema string) (*flats.RepositorySQL, func()){
+func CreateTestFlatsRepository(schema string) (*flats.RepositorySQL, func()) {
 	psqlConn := fmt.Sprintf("host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable search_path=%s", schema)
 
 	db, err := sql.Open("pgx", psqlConn)
@@ -54,4 +53,3 @@ func CreateTestFlatsRepository(schema string) (*flats.RepositorySQL, func()){
 		}
 	}
 }
-

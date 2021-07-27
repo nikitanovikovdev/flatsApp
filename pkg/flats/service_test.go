@@ -2,38 +2,39 @@ package flats_test
 
 import (
 	"context"
+	_ "database/sql"
 	"flatApp/pkg/flats"
 	"flatApp/pkg/platform/flat"
 	"flatApp/tests/database"
 	"flatApp/tests/testData"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
+
+var correctUsername = "lera"
 
 func TestService_Create(t *testing.T) {
 	ctx := context.Background()
 
-	tests := []struct{
-		name string
-		body flat.Flat
+	tests := []struct {
+		name          string
+		body          flat.Flat
+		username      string
 		expectedError bool
-	} {
+	}{
 		{
-			name: "should create flat",
-			body: testData.GiveTrueDataForService,
+			name:          "should create flat",
+			body:          testData.GiveTrueDataForService,
+			username:      correctUsername,
 			expectedError: false,
-		},
-		{
-			name: "shouldn't create flat",
-			body: testData.GiveDataWithoutStreet,
-			expectedError: true,
 		},
 	}
 
 	expectedResult := flat.Flat{
-		Street: "Mira",
+		Street:      "Mira",
 		HouseNumber: "99",
-		RoomNumber: 98,
+		RoomNumber:  98,
 		Description: "test description",
 		City: flat.City{
 			ID: 2,
@@ -46,7 +47,7 @@ func TestService_Create(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := service.Create(ctx,testData.ConvertToBytes(tc.body))
+			result, err := service.Create(ctx, testData.ConvertToBytes(tc.body), tc.username)
 
 			if tc.expectedError {
 				assert.Error(t, err)
@@ -61,42 +62,42 @@ func TestService_Create(t *testing.T) {
 func TestService_Read(t *testing.T) {
 	ctx := context.Background()
 
-	tests := []struct{
-		name string
-		id string
+	tests := []struct {
+		name          string
+		username      string
 		expectedError bool
 	}{
 		{
-			name: "should return flat",
-			id : "1",
+			name:          "should return flat",
+			username:      correctUsername,
 			expectedError: false,
-		},
-		{
-			name: "shouldn't return flat",
-			id : "11",
-			expectedError: true,
 		},
 	}
 
-	expectedResult := flat.Flat{
-		ID:          1,
-		Street:      "Lenina",
-		HouseNumber: "77A",
-		RoomNumber:  33,
-		Description: "good flat",
-		City: flat.City{
-			ID:      1,
-			Country: "Belarus",
-			Name:    "Minsk",
+	expectedResult := []flat.Flat(
+		[]flat.Flat{
+			{
+				ID:          2,
+				Street:      "Tolstogo",
+				HouseNumber: "13",
+				RoomNumber:  71,
+				Description: "",
+				City: flat.City{
+					ID:      2,
+					Country: "Belarus",
+					Name:    "Brest",
+				},
+			},
 		},
-	}
+	)
+
 	repo, cleanup := database.CreateTestFlatsRepository("readFlat")
 	service := flats.NewService(repo)
 	defer cleanup()
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			result, err := service.Read(ctx, tc.id)
+			result, err := service.Read(ctx, tc.username)
 			if tc.expectedError {
 				assert.Error(t, err)
 			} else {
@@ -157,26 +158,28 @@ func TestService_ReadAll(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedResult, result)
-
 }
 
 func TestService_Update(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name string
-		id string
-		body flat.Flat
+		name     string
+		id       string
+		body     flat.Flat
+		username string
 	}{
 		{
-			name: "should update flat",
-			id: "1",
-			body: testData.GiveTrueDataForService,
+			name:     "should update flat",
+			id:       "1",
+			body:     testData.GiveTrueDataForService,
+			username: correctUsername,
 		},
 		{
-			name: "shouldn't update flat",
-			id: "12",
-			body: testData.GiveTrueDataForService,
+			name:     "shouldn't update flat",
+			id:       "12",
+			body:     testData.GiveTrueDataForService,
+			username: "petr",
 		},
 	}
 
@@ -186,7 +189,7 @@ func TestService_Update(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := service.Update(ctx, tc.id, testData.ConvertToBytes(tc.body))
+			err := service.Update(ctx, tc.id, testData.ConvertToBytes(tc.body), tc.username)
 			if err != nil {
 				assert.Errorf(t, err, "Incorrect result")
 			}
@@ -198,16 +201,19 @@ func TestService_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name string
-		id string
+		name     string
+		id       string
+		username string
 	}{
 		{
-			name: "should delete flat",
-			id: "2",
+			name:     "should delete flat",
+			id:       "2",
+			username: correctUsername,
 		},
 		{
-			name: "shouldn't delete flat",
-			id: "12",
+			name:     "shouldn't delete flat",
+			id:       "12",
+			username: "petr",
 		},
 	}
 
@@ -217,12 +223,10 @@ func TestService_Delete(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			err := service.Delete(ctx, tc.id)
+			err := service.Delete(ctx, tc.id, tc.username)
 			if err != nil {
 				assert.Errorf(t, err, "Incorrect result")
 			}
 		})
 	}
 }
-
-

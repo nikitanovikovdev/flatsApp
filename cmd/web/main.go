@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"flatApp/internal"
 	"flatApp/pkg/flats"
 	"flatApp/pkg/platform/repository"
 	"github.com/pkg/errors"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/viper"
 )
@@ -33,8 +37,23 @@ func main() {
 	handler := flats.NewHandler(service)
 
 	server := internal.NewServer(viper.GetString("server.host"), viper.GetString("server.port"), flats.NewRouter(handler))
-	if err = server.Run(); err != nil {
-		log.Fatal(err)
+
+	go func() {
+		if err = server.Run(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<- quit
+
+	if err := server.Shutdown(context.Background()); err != nil {
+		log.Fatalf("error occured on server shutting down")
+	}
+
+	if err := db.Close(); err != nil {
+		log.Fatalf("error occured on db connection close")
 	}
 }
 

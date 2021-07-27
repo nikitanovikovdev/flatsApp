@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS flats (
     house_number VARCHAR(5)  NOT NULL CHECK (house_number <> ' '),
     room_number  INT         NOT NULL CHECK (room_number > 0),
     description  TEXT,
-    city_id      INT         NOT NULL REFERENCES cities (id)
+    city_id      INT         NOT NULL REFERENCES cities (id),
+    username     VARCHAR(50) NOT NULL
 );
 

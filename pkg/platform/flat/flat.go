@@ -9,6 +9,15 @@ type Flat struct {
 	City        City   `json:"city"`
 }
 
+type Username struct {
+	Username string `json:"user_name"`
+}
+
+type FlatWithUsername struct {
+	Flat
+	Username
+}
+
 type City struct {
 	ID      int    `json:"id"`
 	Country string `json:"country"`

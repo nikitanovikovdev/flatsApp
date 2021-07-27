@@ -6,13 +6,14 @@ import (
 	"flatApp/pkg/flats"
 	"flatApp/pkg/platform/flat"
 	"flatApp/tests/database"
-	"github.com/gorilla/mux"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/gorilla/mux"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHandler_Create(t *testing.T) {
@@ -66,7 +67,6 @@ func TestHandler_Create(t *testing.T) {
 			require.Equal(tt, tc.message, message)
 		})
 	}
-
 }
 
 func TestHandler_ReadAll(t *testing.T) {
@@ -129,7 +129,7 @@ func TestHandler_Read(t *testing.T) {
 		},
 	}
 
-	repo, cleanup := database.CreateTestFlatsRepository( "readFlat")
+	repo, cleanup := database.CreateTestFlatsRepository("readFlat")
 	defer cleanup()
 
 	s := flats.NewService(repo)
@@ -155,7 +155,6 @@ func TestHandler_Read(t *testing.T) {
 	}
 }
 
-
 func TestHandler_Update(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -165,8 +164,8 @@ func TestHandler_Update(t *testing.T) {
 		message []byte
 	}{
 		{
-			name:    "Should update info about flat",
-			id:      "1",
+			name: "Should update info about flat",
+			id:   "1",
 			body: flat.Flat{
 				Street:      "Pirogova",
 				HouseNumber: "33",
@@ -181,7 +180,7 @@ func TestHandler_Update(t *testing.T) {
 		},
 	}
 
-	repo, cleanup := database.CreateTestFlatsRepository( "updateFlat")
+	repo, cleanup := database.CreateTestFlatsRepository("updateFlat")
 	defer cleanup()
 
 	s := flats.NewService(repo)
@@ -225,7 +224,7 @@ func TestDelete(t *testing.T) {
 		},
 	}
 
-	repo, cleanup := database.CreateTestFlatsRepository( "deleteFlat")
+	repo, cleanup := database.CreateTestFlatsRepository("deleteFlat")
 	defer cleanup()
 
 	s := flats.NewService(repo)

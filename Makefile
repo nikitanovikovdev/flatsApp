@@ -9,3 +9,6 @@ push-flats:
 	docker build -t belka256/flatsapp:latest .
 	docker push belka256/flatsapp:latest
 
+run:
+	go run cmd/users/main.go
+	go run cmd/web/main.go

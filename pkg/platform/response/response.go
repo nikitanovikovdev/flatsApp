@@ -65,4 +65,3 @@ func OkWithMessage(w http.ResponseWriter, message []byte) {
 		log.Println(err.Error())
 	}
 }
-

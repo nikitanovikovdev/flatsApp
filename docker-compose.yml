@@ -16,7 +16,18 @@ services:
       - ./migrations/000002_insert_into_cities.up.sql:/docker-entrypoint-initdb.d/000002_insert_into_cities.up.sql
       - ./migrations/000003_insert_into_flats.up.sql:/docker-entrypoint-initdb.d/000003_insert_into_flats.up.sql
 
-
+  mongodb:
+    image: mongo:latest
+    container_name: mongo_users
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME:root
+      - MONGO_INITDB_PASSWORD:12345
+    volumes:
+      - mongo:/data/db
 
 volumes:
   psql_data:
+  mongo:

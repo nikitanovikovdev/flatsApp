@@ -1,0 +1,21 @@
+version: '3.6'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_flats
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - psql_data:/var/lib/postgresql/data
+      - ./migrations/000001_create_flats.up.sql:/docker-entrypoint-initdb.d/000001_create_flats.up.sql
+      - ./migrations/000002_insert_into_cities.up.sql:/docker-entrypoint-initdb.d/000002_insert_into_cities.up.sql
+      - ./migrations/000003_insert_into_flats.up.sql:/docker-entrypoint-initdb.d/000003_insert_into_flats.up.sql
+      - mongo:/data/db
+
+volumes:
+  psql_data:

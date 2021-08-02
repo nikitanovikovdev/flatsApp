@@ -2,6 +2,7 @@ package middlewear
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/nikitanovikovdev/flatsApp-flats/pkg/platform/response"
 	"github.com/spf13/viper"
 
 	"fmt"
@@ -10,13 +11,15 @@ import (
 
 func IsAuthorized(endpoint http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		b := r.Header["Token"]
-		if b == nil {
-			fmt.Fprintln(w, "token wasn't found")
+		cookie, err  := r.Cookie("token")
+		if err != nil {
+			response.DevError(w, err)
 			return
 		}
 
-		_, err := ParseToken(b[0])
+		token := cookie.Value
+
+		_, err = ParseToken(token)
 		if err != nil {
 			fmt.Fprintln(w, "not valid token")
 			return

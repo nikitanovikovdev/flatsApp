@@ -26,6 +26,8 @@ func (r *Router) initRoutes() http.Handler {
 	m.Handle("/flats", middlewear.IsAuthorized(r.handler.ReadAll())).Methods(http.MethodGet)
 	m.Handle("/flats/{id}", middlewear.IsAuthorized(r.handler.Update())).Methods(http.MethodPut)
 	m.Handle("/flats/{id}", middlewear.IsAuthorized(r.handler.Delete())).Methods(http.MethodDelete)
+	m.Handle("/authorization", r.handler.AuthorizationHandler()).Methods(http.MethodPost)
+	m.Handle("/registration", r.handler.RegistrationHandler()).Methods(http.MethodPost)
 
 	return m
 }

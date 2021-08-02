@@ -65,3 +65,25 @@ func OkWithMessage(w http.ResponseWriter, message []byte) {
 		log.Println(err.Error())
 	}
 }
+
+func InvalidToken(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
+	message := "invalid token"
+
+	if _, err := w.Write([]byte(message)); err != nil {
+		log.Println(err.Error())
+	}
+}
+
+func RegistrError(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+
+	message := "such user exists"
+
+	if _, err := w.Write([]byte(message)); err != nil {
+		log.Println(err.Error())
+	}
+}

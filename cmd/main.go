@@ -1,12 +1,11 @@
 package main
 
 import (
+	"context"
 	"github.com/nikitanovikovdev/flatsApp-flats/internal"
 	"github.com/nikitanovikovdev/flatsApp-flats/pkg/flats"
 	"github.com/nikitanovikovdev/flatsApp-flats/pkg/platform/repository"
 	"github.com/spf13/viper"
-
-	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -34,7 +33,6 @@ func main() {
 	repo := flats.NewRepository(db)
 	service := flats.NewService(repo)
 	handler := flats.NewHandler(service)
-
 	server := internal.NewServer(viper.GetString("server.host"), viper.GetString("server.port"), flats.NewRouter(handler))
 
 	go func() {

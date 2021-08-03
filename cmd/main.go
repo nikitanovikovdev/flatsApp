@@ -61,3 +61,4 @@ func initConfig() error {
 
 	return viper.ReadInConfig()
 }
+

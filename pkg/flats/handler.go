@@ -2,13 +2,10 @@ package flats
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/nikitanovikovdev/flatsApp-flats/pkg/middlewear"
 	"github.com/nikitanovikovdev/flatsApp-flats/pkg/platform/response"
-	"github.com/nikitanovikovdev/flatsApp-flats/pkg/platform/user"
-	authorizations "github.com/nikitanovikovdev/flatsApp-users/proto"
-
-	"google.golang.org/grpc"
 	"io/ioutil"
 	"net/http"
 )
@@ -25,15 +22,13 @@ func NewHandler(s *Service) *Handler {
 
 func (h *Handler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err  := r.Cookie("token")
+		c, err := r.Cookie("token")
 		if err != nil {
-			response.DevError(w, err)
-			return
+			fmt.Fprintln(w, "token is not expected")
 		}
+		tokenString := c.Value
 
-		token := cookie.Value
-
-		username, _ := middlewear.ParseToken(token)
+		username, _ := middlewear.ParseToken(tokenString)
 
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -59,15 +54,13 @@ func (h *Handler) Create() http.HandlerFunc {
 
 func (h *Handler) Read() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err  := r.Cookie("token")
+		c, err := r.Cookie("token")
 		if err != nil {
-			response.DevError(w, err)
-			return
+			fmt.Fprintln(w, "token is not expected")
 		}
+		tokenString := c.Value
 
-		token := cookie.Value
-
-		username, _ := middlewear.ParseToken(token)
+		username, _ := middlewear.ParseToken(tokenString)
 
 		flat, err := h.service.Read(r.Context(), username)
 		if err != nil {
@@ -106,15 +99,13 @@ func (h *Handler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := mux.Vars(r)["id"]
 
-		cookie, err  := r.Cookie("token")
+		c, err := r.Cookie("token")
 		if err != nil {
-			response.DevError(w, err)
-			return
+			fmt.Fprintln(w, "token is not expected")
 		}
+		tokenString := c.Value
 
-		token := cookie.Value
-
-		username, _ := middlewear.ParseToken(token)
+		username, _ := middlewear.ParseToken(tokenString)
 
 		body, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -135,15 +126,13 @@ func (h *Handler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := mux.Vars(r)["id"]
 
-		cookie, err  := r.Cookie("token")
+		c, err := r.Cookie("token")
 		if err != nil {
-			response.DevError(w, err)
-			return
+			fmt.Fprintln(w, "token is not expected")
 		}
+		tokenString := c.Value
 
-		token := cookie.Value
-
-		username, _ := middlewear.ParseToken(token)
+		username, _ := middlewear.ParseToken(tokenString)
 
 		if err := h.service.Delete(r.Context(), id, username); err != nil {
 			response.UserError(w, err)
@@ -154,73 +143,3 @@ func (h *Handler) Delete() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) AuthorizationHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var user user.User
-		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			response.UserError(w, err)
-			return
-		}
-
-		conn, err := grpc.Dial(":8040", grpc.WithInsecure())
-		if err != nil {
-			response.DevError(w, err)
-			return
-		}
-
-		c := authorizations.NewAuthClient(conn)
-
-		tkn, err := c.Authorize(r.Context(), &authorizations.RequestData{Username: user.Username, Password: user.Password})
-		if err != nil {
-			response.DevError(w, err)
-			return
-		}
-
-		token := tkn.GetToken()
-		if token == "" {
-			response.InvalidToken(w)
-			return
-		}
-
-		cookie, err := h.service.Authorize(token)
-		if err != nil {
-			response.DevError(w, err)
-			return
-		}
-
-		http.SetCookie(w, &cookie)
-		response.OkWithMessage(w, []byte(token))
-	}
-}
-
-func (h *Handler) RegistrationHandler() http.HandlerFunc{
-	return func(w http.ResponseWriter, r *http.Request) {
-		var user user.User
-		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			response.UserError(w, err)
-			return
-		}
-
-		conn, err := grpc.Dial(":8040", grpc.WithInsecure())
-		if err != nil {
-			response.DevError(w, err)
-			return
-		}
-
-		c := authorizations.NewAuthClient(conn)
-
-		idRes, err := c.Registr(r.Context(), &authorizations.RegistrData{Username: user.Username, Password: user.Password})
-		if err != nil {
-			response.UserError(w,err)
-			return
-		}
-		id := idRes.GetId()
-
-		if id == "" {
-			response.RegistrError(w)
-			return
-		}
-
-		response.OkWithMessage(w,[]byte(id))
-	}
-}

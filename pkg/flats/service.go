@@ -4,8 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	flat2 "github.com/nikitanovikovdev/flatsApp-flats/pkg/platform/flat"
-	"net/http"
-	"time"
 )
 
 type Service struct {
@@ -77,12 +75,3 @@ func (s *Service) Delete(ctx context.Context, id string, username string) error 
 	return s.repo.Delete(ctx, id, usr)
 }
 
-func (s *Service) Authorize(token string) (http.Cookie, error) {
-	expirationTime := time.Now().Add(1 * time.Hour)
-
-	return http.Cookie{
-		Name: "token",
-		Value: token,
-		Expires: expirationTime,
-	}, nil
-}
